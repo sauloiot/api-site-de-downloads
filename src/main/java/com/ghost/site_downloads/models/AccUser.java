@@ -2,12 +2,12 @@ package com.ghost.site_downloads.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ghost.site_downloads.models.enums.UserType;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Entity
@@ -18,8 +18,12 @@ public class AccUser implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer user_id;
     private String user_name;
-    private String user_email;
+    @Column(unique = true)
+    private String email;
     private String user_password;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "USER_TYPE")
+    private Set<Integer> user_type = new HashSet<>();
 
     //Collections
     @JsonIgnore
@@ -33,14 +37,16 @@ public class AccUser implements Serializable {
     private List<Item> items = new ArrayList<>();
 
     public AccUser() {
+        setUserType(UserType.CLIENT);
     }
 
-    public AccUser(Integer user_id, String user_name, String user_email, String user_password) {
+    public AccUser(Integer user_id, String user_name, String email, String user_password) {
         super();
         this.user_id = user_id;
         this.user_name = user_name;
-        this.user_email = user_email;
+        this.email = email;
         this.user_password = user_password;
+        setUserType(UserType.CLIENT);
     }
 
     public Integer getUser_id() {
@@ -59,12 +65,12 @@ public class AccUser implements Serializable {
         this.user_name = user_name;
     }
 
-    public String getUser_email() {
-        return user_email;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUser_email(String user_email) {
-        this.user_email = user_email;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getUser_password() {
@@ -73,6 +79,14 @@ public class AccUser implements Serializable {
 
     public void setUser_password(String user_password) {
         this.user_password = user_password;
+    }
+
+    public Set<UserType> getUserType(){
+        return user_type.stream().map(x -> UserType.toEnum(x)).collect(Collectors.toSet());
+    }
+
+    public void setUserType(UserType userType){
+        user_type.add(userType.getCod());
     }
 
     public List<Category> getCategories() {
@@ -111,4 +125,5 @@ public class AccUser implements Serializable {
     public int hashCode() {
         return Objects.hash(user_id);
     }
+
 }

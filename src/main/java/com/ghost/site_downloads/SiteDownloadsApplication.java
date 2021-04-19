@@ -2,18 +2,22 @@ package com.ghost.site_downloads;
 
 
 import com.ghost.site_downloads.models.*;
+import com.ghost.site_downloads.models.enums.UserType;
 import com.ghost.site_downloads.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
-//@SpringBootApplication
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class })
+@Profile("default")
+@SpringBootApplication
+//@SpringBootApplication(exclude = {SecurityAutoConfiguration.class })
 public class SiteDownloadsApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
@@ -22,6 +26,8 @@ public class SiteDownloadsApplication implements CommandLineRunner {
 
 
 
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
     @Autowired
     private AccUserRepository accUserRepository;
     @Autowired
@@ -38,7 +44,9 @@ public class SiteDownloadsApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        AccUser admin = new AccUser(null, "admin", "admin@hotmail.com", "123456");
+        AccUser admin = new AccUser(null, "admin", "admin@hotmail.com", bCryptPasswordEncoder.encode("123456"));
+        admin.setUserType(UserType.ADMIN);
+        AccUser user = new AccUser(null, "user", "user@hotmail.com", bCryptPasswordEncoder.encode("123456"));
         Category filmes = new Category(null, "Filmes", "Filmes, Series, Desenhos e Animes", admin);
         Category jogos = new Category(null, "jogos", "jogos, jogos, jogos e jogos", admin);
         SubCategory acao = new SubCategory(null, "acao", "Filmes de acao", admin, filmes);
@@ -56,7 +64,7 @@ public class SiteDownloadsApplication implements CommandLineRunner {
         Item ironman = new Item(null, "ironman 2", "Filme do ironman 2", sdf.parse("01/06/2017"), sdf.parse("21/01/2021"), admin, acao);
 
 
-        accUserRepository.saveAll(Arrays.asList(admin));
+        accUserRepository.saveAll(Arrays.asList(admin, user));
         categoryRepository.saveAll(Arrays.asList(filmes, jogos));
         subCategoryRepository.saveAll(Arrays.asList(acao, terror, aventura, drama));
         itemRepository.saveAll(Arrays.asList(mulherMaravilha, ironman));

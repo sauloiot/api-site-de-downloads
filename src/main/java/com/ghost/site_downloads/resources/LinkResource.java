@@ -1,12 +1,14 @@
 package com.ghost.site_downloads.resources;
 
-import com.ghost.site_downloads.converter.categoryConverters.CategoryBasicWAccUserConverter;
+import com.ghost.site_downloads.converter.LinkCoverters.LinkConverter;
 import com.ghost.site_downloads.converter.categoryConverters.CategoryConverter;
-import com.ghost.site_downloads.dto.categoryDTO.CategoryBasicWAccUserDTO;
+import com.ghost.site_downloads.dto.LinkDTO.LinkDTO;
 import com.ghost.site_downloads.dto.categoryDTO.CategoryDTO;
 import com.ghost.site_downloads.dto.categoryDTO.CategoryWSubCatDTO;
 import com.ghost.site_downloads.models.Category;
+import com.ghost.site_downloads.models.Link;
 import com.ghost.site_downloads.services.CategoryService;
+import com.ghost.site_downloads.services.LinkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,17 +20,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/categories")
-public class CategoryResource {
+@RequestMapping(value = "/link")
+public class LinkResource {
 
     @Autowired
-    private CategoryService service;
+    private LinkService service;
 
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public ResponseEntity<CategoryWSubCatDTO> findById(@PathVariable Integer id) {
-        Category obj = service.findById(id);
-        CategoryWSubCatDTO dto = CategoryConverter.entityToDTO(obj);
+    public ResponseEntity<LinkDTO> findById(@PathVariable Integer id) {
+        Link obj = service.findById(id);
+        LinkDTO dto = LinkConverter.entityToDTO(obj);
 
         return ResponseEntity.ok().body(dto);
     }
@@ -41,23 +43,23 @@ public class CategoryResource {
 //    }
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> insert(@RequestBody CategoryBasicWAccUserDTO obj){
-        Category category = CategoryBasicWAccUserConverter.dtoToEntity(obj);
-        category = service.insert(category);
+    public ResponseEntity<Void> insert(@RequestBody LinkDTO obj){
+        Link link = LinkConverter.dtoToEntity(obj);
+        link = service.insert(link);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(category.getCategory_id())
+                .buildAndExpand(obj.getLink_id())
                 .toUri();
         return ResponseEntity.created(uri).build();
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<Void> update(@RequestBody CategoryBasicWAccUserDTO obj ,@PathVariable Integer id){
-        Category category = CategoryBasicWAccUserConverter.dtoToEntity(obj);
-        category.setCategory_id(id);
-        category = service.update(category);
+    public ResponseEntity<Void> update(@RequestBody LinkDTO obj ,@PathVariable Integer id){
+        Link link = LinkConverter.dtoToEntity(obj);
+        link.setLink_id(id);
+        link = service.update(link);
 
         return ResponseEntity.noContent().build();
 
@@ -78,10 +80,10 @@ public class CategoryResource {
 
 //    @RequestMapping(value = "/findall",method = RequestMethod.GET)
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<List<CategoryDTO>> findAllDTO() {
-        List<Category> list = service.findAll();
-        List<CategoryDTO> listDTO = list.stream().map(obj -> new CategoryDTO(obj)).collect(Collectors.toList());
+    public ResponseEntity<List<LinkDTO>> findAllDTO() {
+        List<Link> list = service.findAll();
+        List<LinkDTO> linkDTO  = LinkConverter.entityToDTOList(list);
 
-        return ResponseEntity.ok().body(listDTO);
+        return ResponseEntity.ok().body(linkDTO);
     }
 }
